@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
   textLabel: {
     fontFamily: 'josefinSansRegular',
     fontSize: 18,
-    color: Colors.accent300,
+    color: Colors.accent100,
     marginBottom: 10,
   },
 });

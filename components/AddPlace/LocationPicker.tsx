@@ -1,10 +1,8 @@
-import { useState, useEffect } from 'react';
 import { View, StyleSheet, Alert, Text } from 'react-native';
 import {
   getCurrentPositionAsync,
   useForegroundPermissions,
   PermissionStatus,
-  reverseGeocodeAsync,
 } from 'expo-location';
 
 import Colors from '../../constans/Colors';
@@ -15,6 +13,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack/lib/types
 import { RoottStackParamList } from '../../types/navigation';
 
 import { Location } from '../../types/places';
+import { getGeocode } from '../../utils/location';
 
 const LocationPicker = ({
   location,
@@ -24,7 +23,6 @@ const LocationPicker = ({
   setLocation: (l: Location) => void;
 }) => {
   const [locationStatus, requestPermission] = useForegroundPermissions();
-  const [geocode, setGeocode] = useState<string>('');
   const navigation =
     useNavigation<
       NativeStackScreenProps<RoottStackParamList, 'AddPlace'>['navigation']
@@ -51,35 +49,29 @@ const LocationPicker = ({
     try {
       const location = await getCurrentPositionAsync();
       const { latitude, longitude } = location.coords;
+      const address = await getGeocode(location.coords);
       setLocation({
         latitude,
         longitude,
+        address
       });
     } catch (err) {
       console.log(err);
     }
   };
-  useEffect(() => {
-    const getGeo = async () => {
-      if (location) {
-        const geo = await reverseGeocodeAsync(location);
-        setGeocode(`${geo[0]?.country}: ${geo[0]?.city}`);
-      }
-    };
-    getGeo();
-  }, [location]);
+  
   const pickLocation = () => {
     navigation.navigate('Map', {
       location,
     });
   };
   let content = 'Location:';
-  if (!!location && !!geocode) {
-    content = `${geocode}`;
+  if (!!location?.address) {
+    content = `${location?.address}`;
   }
   return (
     <View style={styles.wrapper}>
-      <Text style={[styles.text, geocode ? styles.geocode : null]}>
+      <Text style={[styles.text, location?.address ? styles.geocode : null]}>
         {content}
       </Text>
       <View style={styles.buttonsContainer}>

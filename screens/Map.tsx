@@ -8,11 +8,13 @@ import { Location } from '../types/places';
 
 import ScreenTemplate from '../components/ui/ScreenTemplate';
 import PressableIcon from '../components/ui/PressableIcon';
+import { getGeocode } from '../utils/location';
 
 type MapScreenProps = NativeStackScreenProps<RoottStackParamList, 'Map'>;
 
 const Map = ({ route, navigation }: MapScreenProps) => {
   const initialLcation = route.params;
+  const disabled = route.params;
 
   const [location, setLocation] = useState<Location | undefined>(
     initialLcation.location
@@ -25,9 +27,13 @@ const Map = ({ route, navigation }: MapScreenProps) => {
     longitudeDelta: 0.0421,
   };
 
-  const changeLocation = (event: { nativeEvent: { coordinate: any } }) => {
+  const changeLocation = async (event: {
+    nativeEvent: { coordinate: any };
+  }) => {
+    if (disabled && initialLcation) return;
     const coordinate = event.nativeEvent.coordinate;
-    setLocation(coordinate);
+    const address = await getGeocode(coordinate);
+    setLocation({ ...coordinate, address });
   };
 
   const saveLocation = useCallback(() => {
@@ -35,13 +41,13 @@ const Map = ({ route, navigation }: MapScreenProps) => {
       Alert.alert('Cannot save location', 'Location should be picked');
       return;
     }
-    console.log(location);
     navigation.navigate('AddPlace', {
       location,
     });
   }, [navigation, location]);
 
   useLayoutEffect(() => {
+    if (disabled && initialLcation) return;
     navigation.setOptions({
       headerRight: ({ tintColor }) => (
         <PressableIcon

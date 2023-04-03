@@ -1,7 +1,7 @@
 import PlaceForm from '../components/AddPlace/PlaceForm';
 import ScreenTemplate from '../components/ui/ScreenTemplate';
 
-const AddPlace = ({}) => {
+const AddPlace = () => {
   return (
     <ScreenTemplate>
       <PlaceForm />
